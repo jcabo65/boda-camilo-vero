@@ -372,23 +372,35 @@
 <script>
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwu98bB7a9fEZ9Nbq6RYaA0t0cUltcSrzWmwkbbSRuL5EAFU94GUTjz6Cse_zyg9nF7XQ/exec';
 
-// ====== LEER INVITADO DESDE GOOGLE SHEETS ======
-const urlParams = new URLSearchParams(window.location.search);
-const id = urlParams.get('id');
+// Script que busca el nombre del invitado en Google Sheets (el mismo que usa invitacion.html)
+const LOOKUP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcTj_MoRKAioXtbtcT2zjrTvxzjEIIx20Vu9cNL7pK5uxlK_D1hizb8oTtY1QUOODy/exec';
 
-if (id) {
-  fetch('https://script.google.com/macros/s/AKfycbwcTj_MoRKAioXtbtcT2zjrTvxzjEIIx20Vu9cNL7pK5uxlK_D1hizb8oTtY1QUOODy/exec?id=' + encodeURIComponent(id))
+// ====== LEER INVITADO DESDE LA URL ======
+const urlParams = new URLSearchParams(window.location.search);
+const idParam = urlParams.get('id');
+const invitadoParam = urlParams.get('invitado');
+
+function mostrarInvitado(nombre) {
+  document.getElementById('guest-name').textContent = nombre;
+  document.getElementById('guest-box').classList.remove('hidden');
+  document.getElementById('name').value = nombre;
+}
+
+if (idParam) {
+  // Viene desde invitacion.html con ?id=... -> buscamos el nombre en Google Sheets
+  fetch(LOOKUP_SCRIPT_URL + '?id=' + encodeURIComponent(idParam))
     .then(response => response.json())
     .then(data => {
       if (data.nombre) {
-        document.getElementById('guest-name').textContent = data.nombre;
-        document.getElementById('guest-box').classList.remove('hidden');
-        document.getElementById('name').value = data.nombre;
+        mostrarInvitado(data.nombre);
       }
     })
-    .catch(error => {
-      console.error('Error buscando invitado:', error);
+    .catch(() => {
+      // Si falla la búsqueda, el invitado igual puede escribir su nombre a mano.
     });
+} else if (invitadoParam) {
+  // Compatibilidad con links viejos tipo ?invitado=Nombre
+  mostrarInvitado(decodeURIComponent(invitadoParam));
 }
 
 let attending = null;
