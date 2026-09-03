@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Camilo & Vero</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f5f1eb;
+    font-family: Georgia, "Times New Roman", serif;
+    color: #4a4038;
+    padding: 20px;
+}
+
+.card {
+    width: 100%;
+    max-width: 430px;
+    min-height: 650px;
+    background: #fffdf9;
+    border: 1px solid #ded4c8;
+    padding: 55px 35px;
+    text-align: center;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+.card::before,
+.card::after {
+    content: "✦";
+    position: absolute;
+    font-size: 22px;
+    color: #b49a7a;
+}
+
+.card::before {
+    top: 20px;
+    left: 25px;
+}
+
+.card::after {
+    bottom: 20px;
+    right: 25px;
+}
+
+.small {
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 25px;
+    color: #927d68;
+}
+
+h1 {
+    font-size: 48px;
+    font-weight: normal;
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+.and {
+    font-size: 24px;
+    font-style: italic;
+    margin: 10px 0;
+    color: #a38b72;
+}
+
+.subtitle {
+    font-size: 18px;
+    font-style: italic;
+    margin: 25px 0 35px;
+}
+
+.message {
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 30px;
+}
+
+.guest {
+    font-size: 24px;
+    margin: 15px 0 30px;
+    font-weight: normal;
+}
+
+.date {
+    font-size: 18px;
+    letter-spacing: 2px;
+    margin-bottom: 35px;
+}
+
+.button {
+    display: inline-block;
+    padding: 15px 28px;
+    background: #5f5348;
+    color: white;
+    text-decoration: none;
+    letter-spacing: 1px;
+    font-size: 13px;
+    border-radius: 2px;
+}
+
+.button:hover {
+    background: #4a4038;
+}
+
+.footer {
+    margin-top: 35px;
+    font-size: 13px;
+    font-style: italic;
+    color: #927d68;
+}
+
+#error {
+    display: none;
+    font-size: 16px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card" id="card">
+
+    <div class="small">
+        Una invitación especial
+    </div>
+
+    <h1>Camilo</h1>
+
+    <div class="and">
+        &
+    </div>
+
+    <h1>Vero</h1>
+
+    <div class="subtitle">
+        ¡Nos casamos!
+    </div>
+
+    <div class="message">
+        Con mucha alegría queremos compartir
+        contigo uno de los días más importantes
+        de nuestras vidas.
+        <br><br>
+        Tenemos el gusto de invitar a:
+    </div>
+
+    <div class="guest" id="guest-name">
+        Cargando...
+    </div>
+
+    <div class="date">
+        15 · 11 · 2026
+    </div>
+
+    <a
+        class="button"
+        id="invitation-button"
+        href="#"
+    >
+        VER MI INVITACIÓN
+    </a>
+
+    <div class="footer">
+        Con cariño,<br>
+        Camilo & Vero
+    </div>
+
+    <div id="error">
+        No encontramos esta invitación.
+    </div>
+
+</div>
+
+
+<script>
+
+// ==========================================
+// URL DE GOOGLE APPS SCRIPT
+// ==========================================
+
+const GOOGLE_SCRIPT_URL =
+'https://script.google.com/macros/s/AKfycbwcTj_MoRKAioXtbtcT2zjrTvxzjEIIx20Vu9cNL7pK5uxlK_D1hizb8oTtY1QUOODy/exec';
+
+
+// ==========================================
+// OBTENER EL ID DE LA URL
+// ==========================================
+
+// Ejemplo:
+// invitation.html?id=1
+
+const urlParams = new URLSearchParams(
+    window.location.search
+);
+
+let id = urlParams.get('id');
+
+
+// Si no existe ID, usamos 1 para la prueba
+
+if (!id) {
+    id = '1';
+}
+
+
+// ==========================================
+// BUSCAR INVITADO EN GOOGLE SHEETS
+// ==========================================
+
+fetch(
+    GOOGLE_SCRIPT_URL +
+    '?id=' +
+    encodeURIComponent(id)
+)
+
+.then(response => {
+
+    if (!response.ok) {
+        throw new Error(
+            'Error al conectar con Google Apps Script'
+        );
+    }
+
+    return response.json();
+
+})
+
+.then(data => {
+
+    console.log('Respuesta de Google:', data);
+
+
+    // ======================================
+    // INVITADO ENCONTRADO
+    // ======================================
+
+    if (data.nombre) {
+
+        document.getElementById(
+            'guest-name'
+        ).textContent = data.nombre;
+
+
+        // ==================================
+        // BOTÓN VER MI INVITACIÓN
+        // ==================================
+
+        document.getElementById(
+            'invitation-button'
+        ).href =
+            'https://jcabo65.github.io/boda-camilo-vero/rsvp2-boda.html?id='
+            + encodeURIComponent(id);
+
+
+    }
+
+    // ======================================
+    // INVITADO NO ENCONTRADO
+    // ======================================
+
+    else {
+
+        document.getElementById(
+            'guest-name'
+        ).textContent =
+            'Invitado no encontrado';
+
+        document.getElementById(
+            'invitation-button'
+        ).style.display = 'none';
+
+    }
+
+})
+
+.catch(error => {
+
+    console.error(
+        'Error:',
+        error
+    );
+
+    document.getElementById(
+        'guest-name'
+    ).textContent =
+        'No se pudo cargar la invitación';
+
+});
+
+</script>
+
+</body>
+</html>
