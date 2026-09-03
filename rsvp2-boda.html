@@ -372,15 +372,23 @@
 <script>
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwu98bB7a9fEZ9Nbq6RYaA0t0cUltcSrzWmwkbbSRuL5EAFU94GUTjz6Cse_zyg9nF7XQ/exec';
 
-// ====== LEER INVITADO DESDE LA URL ======
+// ====== LEER INVITADO DESDE GOOGLE SHEETS ======
 const urlParams = new URLSearchParams(window.location.search);
-const invitadoParam = urlParams.get('invitado');
+const id = urlParams.get('id');
 
-if (invitadoParam) {
-  const nombreDecodificado = decodeURIComponent(invitadoParam);
-  document.getElementById('guest-name').textContent = nombreDecodificado;
-  document.getElementById('guest-box').classList.remove('hidden');
-  document.getElementById('name').value = nombreDecodificado;
+if (id) {
+  fetch('https://script.google.com/macros/s/AKfycbwcTj_MoRKAioXtbtcT2zjrTvxzjEIIx20Vu9cNL7pK5uxlK_D1hizb8oTtY1QUOODy/exec?id=' + encodeURIComponent(id))
+    .then(response => response.json())
+    .then(data => {
+      if (data.nombre) {
+        document.getElementById('guest-name').textContent = data.nombre;
+        document.getElementById('guest-box').classList.remove('hidden');
+        document.getElementById('name').value = data.nombre;
+      }
+    })
+    .catch(error => {
+      console.error('Error buscando invitado:', error);
+    });
 }
 
 let attending = null;
