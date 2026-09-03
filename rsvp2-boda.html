@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Camilo &amp; Vero — Confirmar asistencia</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@400;500&display=swap');
+
+  :root{
+    --cream:#FAF3E8;
+    --blush:#E7B7A4;
+    --terracotta:#C1694A;
+    --terracotta-dark:#8C4530;
+    --forest:#2F3B2B;
+    --forest-light:#5B6B4F;
+    --gold:#B8863F;
+    --ink:#3A342B;
+    --muted:#8C7F6B;
+    --line:#DCC9AE;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:48px 20px;
+    font-family:'Jost', sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 15% 8%, rgba(199,164,92,0.10), transparent 45%),
+      radial-gradient(circle at 85% 92%, rgba(122,140,96,0.10), transparent 50%),
+      var(--cream);
+  }
+  .card{
+    width:100%;
+    max-width:480px;
+  }
+  .frame{
+    background:#FFFDF9;
+    border:1px solid var(--line);
+    padding:64px 40px;
+    position:relative;
+    box-shadow:0 18px 40px -20px rgba(140,69,48,0.25);
+    overflow:hidden;
+  }
+  .frame::before{
+    content:"";
+    position:absolute;
+    top:8px; left:8px; right:8px; bottom:8px;
+    border:1px solid var(--gold);
+    opacity:0.55;
+    pointer-events:none;
+  }
+  .guest-header{
+    text-align:center;
+    margin-bottom:18px;
+    padding:10px;
+    background:rgba(231, 183, 164, 0.15);
+    border:1px dashed var(--gold);
+    border-radius:4px;
+  }
+  .guest-header span{
+    display:block;
+    font-size:11px;
+    letter-spacing:2px;
+    color:var(--gold);
+    text-transform:uppercase;
+  }
+  .guest-header h2{
+    font-family:'Cormorant Garamond', serif;
+    font-size:24px;
+    color:var(--forest);
+    margin:4px 0 0 0;
+    font-weight:500;
+  }
+  .eyebrow{
+    text-align:center;
+    font-size:12px;
+    letter-spacing:3px;
+    color:var(--gold);
+    margin:0 0 18px;
+  }
+  h1{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:500;
+    font-size:46px;
+    text-align:center;
+    color:var(--forest);
+    margin:0;
+    line-height:1.15;
+  }
+  .amp{
+    display:block;
+    font-style:italic;
+    font-size:24px;
+    color:var(--gold);
+    margin:6px 0;
+  }
+  .details{
+    text-align:center;
+    margin:28px 0 8px;
+    color:var(--muted);
+    font-size:15px;
+    line-height:1.9;
+  }
+  .details strong{
+    color:var(--forest);
+    font-weight:500;
+  }
+  .divider{
+    width:60px;
+    height:1px;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin:32px auto;
+    opacity:0.8;
+  }
+  form{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  label{
+    font-size:12px;
+    letter-spacing:1px;
+    color:var(--forest);
+    margin-bottom:6px;
+    display:block;
+  }
+  input[type="text"], input[type="number"], textarea{
+    width:100%;
+    border:none;
+    border-bottom:1px solid var(--line);
+    background:transparent;
+    font-family:'Jost', sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    padding:8px 2px;
+    outline:none;
+    transition:border-color .2s ease;
+  }
+  input:focus, textarea:focus{
+    border-color:var(--terracotta);
+  }
+  textarea{resize:vertical; min-height:60px;}
+  .attend-toggle{
+    display:flex;
+    gap:12px;
+  }
+  .attend-toggle button{
+    flex:1;
+    padding:12px;
+    border:1px solid var(--line);
+    background:transparent;
+    font-family:'Jost', sans-serif;
+    font-size:14px;
+    color:var(--muted);
+    cursor:pointer;
+    transition:all .2s ease;
+    border-radius:2px;
+  }
+  .attend-toggle button.active{
+    border-color:var(--terracotta);
+    background:var(--blush);
+    color:var(--terracotta-dark);
+  }
+  .guests-field{
+    max-height:0;
+    opacity:0;
+    overflow:hidden;
+    transition:max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease;
+    margin-top:0;
+  }
+  .guests-field.show{
+    max-height:120px;
+    opacity:1;
+    margin-top:6px;
+  }
+  .submit-btn{
+    margin-top:12px;
+    padding:14px;
+    background:var(--terracotta-dark);
+    color:#FFFDF9;
+    border:none;
+    font-family:'Jost', sans-serif;
+    font-size:14px;
+    letter-spacing:1px;
+    cursor:pointer;
+    transition:background .2s ease;
+    border-radius:2px;
+  }
+  .submit-btn:hover{
+    background:var(--terracotta);
+  }
+  .error{
+    font-size:12px;
+    color:#A3492F;
+    margin-top:4px;
+  }
+  .confirmation{
+    text-align:center;
+    padding:20px 0;
+  }
+  .confirmation p:first-child{
+    font-family:'Cormorant Garamond', serif;
+    font-size:26px;
+    color:var(--terracotta-dark);
+  }
+  .confirmation p{
+    color:var(--muted);
+    font-size:14px;
+    line-height:1.7;
+  }
+  .hidden{display:none !important;}
+
+  /* Admin view */
+  .admin-list{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+  }
+  .admin-row{
+    padding:14px 4px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .admin-row:last-child{border-bottom:none;}
+  .admin-name{
+    font-family:'Cormorant Garamond', serif;
+    font-size:19px;
+    color:var(--ink);
+  }
+  .admin-meta{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:2px;
+  }
+  .admin-msg{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:4px;
+    font-style:italic;
+  }
+  .tag{
+    font-size:11px;
+    padding:3px 9px;
+    border-radius:12px;
+    white-space:nowrap;
+  }
+  .tag-yes{background:#E4EBDC; color:var(--forest);}
+  .tag-no{background:#F3E1DA; color:var(--terracotta-dark);}
+  .admin-summary{
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:20px;
+  }
+  .admin-empty{
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    padding:20px 0;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="frame">
+    <svg width="80" height="80" viewBox="0 0 80 80" style="position:absolute; top:20px; left:20px; pointer-events:none;">
+      <path d="M0 60 Q20 20 70 8" fill="none" stroke="#7C8C60" stroke-width="1.4"/>
+      <ellipse cx="15" cy="45" rx="10" ry="5" fill="#8A9A6E" transform="rotate(-40 15 45)"/>
+      <ellipse cx="30" cy="28" rx="9" ry="5" fill="#B7C299" transform="rotate(-25 30 28)"/>
+      <ellipse cx="48" cy="16" rx="9" ry="5" fill="#8A9A6E" transform="rotate(-10 48 16)"/>
+      <ellipse cx="65" cy="9" rx="8" ry="4.5" fill="#B7C299" transform="rotate(5 65 9)"/>
+    </svg>
+    <svg width="80" height="80" viewBox="0 0 80 80" style="position:absolute; bottom:20px; right:20px; pointer-events:none; transform:rotate(180deg);">
+      <path d="M0 60 Q20 20 70 8" fill="none" stroke="#7C8C60" stroke-width="1.4"/>
+      <ellipse cx="15" cy="45" rx="10" ry="5" fill="#8A9A6E" transform="rotate(-40 15 45)"/>
+      <ellipse cx="30" cy="28" rx="9" ry="5" fill="#B7C299" transform="rotate(-25 30 28)"/>
+      <ellipse cx="48" cy="16" rx="9" ry="5" fill="#8A9A6E" transform="rotate(-10 48 16)"/>
+      <ellipse cx="65" cy="9" rx="8" ry="4.5" fill="#B7C299" transform="rotate(5 65 9)"/>
+    </svg>
+
+    <div id="guest-view">
+      <svg width="88" height="88" viewBox="0 0 380 300" style="display:block; margin:0 auto 12px;">
+        <circle cx="190" cy="150" r="148" fill="none" stroke="#C7A45C" stroke-width="1.5"/>
+        <circle cx="190" cy="150" r="136" fill="none" stroke="#C7A45C" stroke-width="0.6"/>
+        <text x="130" y="172" font-family="'Cormorant Garamond', serif" font-size="66" fill="#4A5238" text-anchor="middle">C</text>
+        <text x="190" y="196" font-family="'Cormorant Garamond', serif" font-style="italic" font-size="26" fill="#C7A45C" text-anchor="middle">&amp;</text>
+        <text x="250" y="172" font-family="'Cormorant Garamond', serif" font-size="66" fill="#4A5238" text-anchor="middle">V</text>
+      </svg>
+
+      <!-- SECCIÓN DINÁMICA DE INVITADO -->
+      <div id="guest-box" class="guest-header hidden">
+        <span>Invitación Especial Para</span>
+        <h2 id="guest-name"></h2>
+      </div>
+
+      <p class="eyebrow">LOS INVITAMOS A NUESTRA BODA, CONFIRMAR ASISTENCIA</p>
+      <h1>Camilo<span class="amp">&amp;</span>Vero</h1>
+
+      <div class="details">
+        <strong>23 de enero, 2027</strong> · 4:00 de la tarde<br>
+        Iglesia Santo Cristo, Bello
+      </div>
+
+      <div style="display:flex; justify-content:center; gap:28px; margin:20px 0 4px; font-size:12px; color:var(--muted); text-align:center;">
+        <div>
+          <div style="letter-spacing:1px; color:var(--forest); font-size:11px; margin-bottom:4px;">CÓDIGO DE VESTIR</div>
+          Elegante casual
+        </div>
+        <div>
+          <div style="letter-spacing:1px; color:var(--forest); font-size:11px; margin-bottom:4px;">REGALOS</div>
+          Lluvia de sobres
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div id="form-view">
+        <form id="rsvp-form">
+          <div>
+            <label for="name">Nombre completo</label>
+            <input type="text" id="name" placeholder="Escribe tu nombre">
+            <div class="error hidden" id="name-error">Escribe tu nombre para continuar.</div>
+          </div>
+
+          <div>
+            <label>¿Nos acompañas?</label>
+            <div class="attend-toggle">
+              <button type="button" id="btn-yes">Sí, ahí estaré</button>
+              <button type="button" id="btn-no">No podré ir</button>
+            </div>
+            <div class="error hidden" id="attend-error">Selecciona una opción.</div>
+          </div>
+
+          <div class="guests-field" id="guests-field">
+            <label for="guests">Número de acompañantes</label>
+            <input type="number" id="guests" min="0" max="10" placeholder="0">
+            <div class="error hidden" id="guests-error">Escribe el número de acompañantes (puede ser 0).</div>
+          </div>
+
+          <div>
+            <label for="message">Mensaje (opcional)</label>
+            <textarea id="message" placeholder="Deja un mensaje para los novios"></textarea>
+          </div>
+
+          <button type="submit" class="submit-btn">Confirmar</button>
+        </form>
+      </div>
+
+      <div id="confirmation-view" class="confirmation hidden">
+        <p>Gracias</p>
+        <p id="confirmation-text"></p>
+      </div>
+    </div>
+
+    <div id="admin-view" class="hidden">
+      <p class="eyebrow">CONFIRMACIONES</p>
+      <h1 style="font-size:32px;">Camilo<span class="amp" style="font-size:18px;">&amp;</span>Vero</h1>
+      <div class="divider"></div>
+      <div id="admin-summary" class="admin-summary"></div>
+      <div id="admin-list" class="admin-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwu98bB7a9fEZ9Nbq6RYaA0t0cUltcSrzWmwkbbSRuL5EAFU94GUTjz6Cse_zyg9nF7XQ/exec';
+
+// ====== LEER INVITADO DESDE LA URL ======
+const urlParams = new URLSearchParams(window.location.search);
+const invitadoParam = urlParams.get('invitado');
+
+if (invitadoParam) {
+  const nombreDecodificado = decodeURIComponent(invitadoParam);
+  document.getElementById('guest-name').textContent = nombreDecodificado;
+  document.getElementById('guest-box').classList.remove('hidden');
+  document.getElementById('name').value = nombreDecodificado;
+}
+
+let attending = null;
+const isAdmin = urlParams.has('admin');
+
+const btnYes = document.getElementById('btn-yes');
+const btnNo = document.getElementById('btn-no');
+const guestsField = document.getElementById('guests-field');
+const attendError = document.getElementById('attend-error');
+
+btnYes.addEventListener('click', () => {
+  attending = true;
+  btnYes.classList.add('active');
+  btnNo.classList.remove('active');
+  guestsField.classList.add('show');
+  attendError.classList.add('hidden');
+});
+
+btnNo.addEventListener('click', () => {
+  attending = false;
+  btnNo.classList.add('active');
+  btnYes.classList.remove('active');
+  guestsField.classList.remove('show');
+  attendError.classList.add('hidden');
+  document.getElementById('guests-error').classList.add('hidden');
+});
+
+document.getElementById('guests').addEventListener('input', () => {
+  document.getElementById('guests-error').classList.add('hidden');
+});
+
+document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const nameInput = document.getElementById('name');
+  const nameError = document.getElementById('name-error');
+  const name = nameInput.value.trim();
+
+  let valid = true;
+  if (!name) {
+    nameError.classList.remove('hidden');
+    valid = false;
+  } else {
+    nameError.classList.add('hidden');
+  }
+
+  if (attending === null) {
+    attendError.classList.remove('hidden');
+    valid = false;
+  } else {
+    attendError.classList.add('hidden');
+  }
+
+  const guestsInput = document.getElementById('guests');
+  const guestsError = document.getElementById('guests-error');
+  if (attending === true && guestsInput.value.trim() === '') {
+    guestsError.classList.remove('hidden');
+    valid = false;
+  } else {
+    guestsError.classList.add('hidden');
+  }
+
+  if (!valid) return;
+
+  const guests = attending ? Number(guestsInput.value || 0) : 0;
+  const message = document.getElementById('message').value.trim();
+
+  const entry = {
+    name,
+    attending,
+    guests,
+    message,
+    submittedAt: new Date().toISOString()
+  };
+
+  const submitBtn = document.querySelector('.submit-btn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Enviando...';
+
+  if (window.storage) {
+    try {
+      const key = 'rsvp:' + name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now();
+      await window.storage.set(key, JSON.stringify(entry), true);
+    } catch (storageErr) {
+      // Continuar sin respaldo local
+    }
+  }
+
+  if (GOOGLE_SCRIPT_URL !== 'TU_SCRIPT_URL') {
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          Nombre: name,
+          Asistencia: attending ? 'Sí asistiré' : 'No podré ir',
+          Acompañantes: guests,
+          Mensaje: message || '(sin mensaje)'
+        })
+      });
+    } catch (scriptErr) {
+      // Continuar
+    }
+  }
+
+  document.getElementById('form-view').classList.add('hidden');
+  document.getElementById('confirmation-view').classList.remove('hidden');
+  const confText = document.getElementById('confirmation-text');
+  confText.textContent = attending
+    ? 'Tu asistencia quedó confirmada. Nos vemos el 23 de enero.'
+    : 'Gracias por avisarnos. Te vamos a extrañar ese día.';
+});
+
+async function loadAdminView() {
+  document.getElementById('guest-view').classList.add('hidden');
+  document.getElementById('admin-view').classList.remove('hidden');
+
+  const listEl = document.getElementById('admin-list');
+  const summaryEl = document.getElementById('admin-summary');
+
+  try {
+    const listResult = await window.storage.list('rsvp:', true);
+    const keys = (listResult && listResult.keys) || [];
+
+    if (keys.length === 0) {
+      listEl.innerHTML = '<div class="admin-empty">Todavía no hay confirmaciones.</div>';
+      summaryEl.textContent = '';
+      return;
+    }
+
+    const entries = [];
+    for (const key of keys) {
+      try {
+        const res = await window.storage.get(key, true);
+        if (res && res.value) entries.push(JSON.parse(res.value));
+      } catch (e) { /* omitir entrada vacía */ }
+    }
+
+    entries.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+
+    const yesCount = entries.filter(e => e.attending).length;
+    const totalGuests = entries.filter(e => e.attending).reduce((sum, e) => sum + (e.guests || 0), 0);
+    summaryEl.textContent = yesCount + ' confirmados · ' + totalGuests + ' acompañantes · ' + (entries.length - yesCount) + ' no asisten';
+
+    listEl.innerHTML = entries.map(e => {
+      const date = new Date(e.submittedAt);
+      const dateStr = date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
+      return '<div class="admin-row">' +
+        '<div>' +
+          '<div class="admin-name">' + escapeHtml(e.name) + '</div>' +
+          '<div class="admin-meta">' + dateStr + (e.attending && e.guests ? ' · +' + e.guests + ' acompañantes' : '') + '</div>' +
+          (e.message ? '<div class="admin-msg">"' + escapeHtml(e.message) + '"</div>' : '') +
+        '</div>' +
+        '<span class="tag ' + (e.attending ? 'tag-yes' : 'tag-no') + '">' + (e.attending ? 'Asiste' : 'No asiste') + '</span>' +
+      '</div>';
+    }).join('');
+  } catch (err) {
+    listEl.innerHTML = '<div class="admin-empty">No se pudieron cargar las confirmaciones.</div>';
+  }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+if (isAdmin) {
+  loadAdminView();
+}
+</script>
+</body>
+</html>
