@@ -125,11 +125,36 @@
   /* ====== Sección "Cómo llegar" (mapas) ====== */
   .location-section{
     margin:8px 0 4px;
+    text-align:center;
   }
+  .location-links{
+    display:flex;
+    gap:12px;
+  }
+  .location-open-btn{
+    flex:1;
+    padding:12px;
+    border:1px solid var(--line);
+    background:transparent;
+    font-family:'EB Garamond', Georgia, serif;
+    font-size:14px;
+    letter-spacing:0.5px;
+    color:var(--gold-deep);
+    cursor:pointer;
+    transition:all .2s ease;
+    border-radius:2px;
+  }
+  .location-open-btn:hover{
+    border-color:var(--green);
+    background:var(--cream-deep);
+  }
+  .location-detail{
+    margin-top:20px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+  }
+  .location-detail.collapsed{display:none;}
   .location-card{
-    margin-bottom:22px;
-  }
-  .location-card:last-child{
     margin-bottom:0;
   }
   .location-label{
@@ -137,27 +162,30 @@
     letter-spacing:2px;
     color:var(--gold);
     text-transform:uppercase;
-    margin-bottom:4px;
+    margin-bottom:6px;
   }
   .location-name{
     font-family:'Cormorant Garamond', serif;
-    font-size:20px;
+    font-size:19px;
+    font-weight:500;
     color:var(--ink);
+    margin:0 0 2px;
   }
   .location-address{
     font-size:13px;
     color:var(--ink-soft);
-    margin:2px 0 10px;
+    margin:0 0 12px;
   }
   .location-datetime{
-    font-size:15px;
-    color:var(--ink);
-    font-weight:500;
-    margin:2px 0 12px;
+    font-size:13px;
+    color:var(--ink-soft);
+    font-style:italic;
+    margin:0 0 8px;
   }
   .location-datetime strong{
     color:var(--gold-deep);
     font-weight:600;
+    font-style:normal;
   }
   .location-map{
     width:100%;
@@ -465,36 +493,53 @@
 
       <div class="divider"></div>
 
-      <!-- ====== CEREMONIA: fecha, iglesia y ciudad ====== -->
+      <!-- ====== CÓMO LLEGAR: botones para ceremonia y recepción ====== -->
       <div class="location-section" id="como-llegar">
-        <p class="eyebrow" style="margin-bottom:16px;">CEREMONIA</p>
+        <p class="eyebrow" style="margin-bottom:16px;">CÓMO LLEGAR</p>
 
-        <div class="location-card">
-          <div class="location-name">23 de enero, 2027 · 4:00 de la tarde</div>
-          <div class="location-name">Iglesia Santo Cristo</div>
-          <div class="location-address">Cra. 54 #52c30, La Mesa, Bello, Antioquia</div>
-          <iframe
-            class="location-map"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            title="Mapa Iglesia Santo Cristo, Bello"
-            src="https://www.google.com/maps?q=Cra.+54+%2352c30,+La+Mesa,+Bello,+Antioquia&output=embed">
-          </iframe>
-          <a class="location-link" href="https://www.google.com/maps/search/?api=1&query=Cra.+54+%2352c30,+La+Mesa,+Bello,+Antioquia" target="_blank" rel="noopener">Cómo llegar en Google Maps →</a>
+        <div class="location-links" id="location-links">
+          <button type="button" class="location-open-btn" id="open-ceremony-btn">Ceremonia</button>
+          <button type="button" class="location-open-btn" id="open-reception-btn">Recepción</button>
         </div>
 
-        <div class="location-card">
-          <div class="location-label">Recepción</div>
-          <div class="location-name">Cuarzo Salón de Eventos</div>
-          <div class="location-address">Cq. 3 #69-38, Laureles - Estadio, Medellín, Antioquia</div>
-          <iframe
-            class="location-map"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            title="Mapa Cuarzo Salón de Eventos"
-            src="https://www.google.com/maps?q=Cq.+3+%2369-38,+Laureles+-+Estadio,+Medellin,+Antioquia&output=embed">
-          </iframe>
-          <a class="location-link" href="https://www.google.com/maps/search/?api=1&query=Cq.+3+%2369-38,+Laureles+-+Estadio,+Medellin,+Antioquia" target="_blank" rel="noopener">Cómo llegar en Google Maps →</a>
+        <div id="ceremony-view" class="location-detail collapsed">
+          <div class="location-card">
+            <div class="location-label">Ceremonia</div>
+            <div class="location-name">Iglesia Santo Cristo</div>
+            <div class="location-datetime">23 de enero, 2027 · <strong>4:00 p. m.</strong></div>
+            <div class="location-address">Cra. 54 #52c30, La Mesa, Bello, Antioquia</div>
+            <iframe
+              class="location-map"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              title="Mapa Iglesia Santo Cristo, Bello"
+              src="https://www.google.com/maps?q=Cra.+54+%2352c30,+La+Mesa,+Bello,+Antioquia&output=embed">
+            </iframe>
+            <a class="location-link" href="https://www.google.com/maps/search/?api=1&query=Cra.+54+%2352c30,+La+Mesa,+Bello,+Antioquia" target="_blank" rel="noopener">Cómo llegar en Google Maps →</a>
+          </div>
+          <div class="nav-actions">
+            <button type="button" class="nav-btn location-back-btn">← Volver</button>
+          </div>
+        </div>
+
+        <div id="reception-view" class="location-detail collapsed">
+          <div class="location-card">
+            <div class="location-label">Recepción</div>
+            <div class="location-name">Cuarzo Salón de Eventos</div>
+            <div class="location-datetime">23 de enero, 2027 · <strong>Después de la ceremonia</strong></div>
+            <div class="location-address">Cq. 3 #69-38, Laureles - Estadio, Medellín, Antioquia</div>
+            <iframe
+              class="location-map"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              title="Mapa Cuarzo Salón de Eventos"
+              src="https://www.google.com/maps?q=Cq.+3+%2369-38,+Laureles+-+Estadio,+Medellin,+Antioquia&output=embed">
+            </iframe>
+            <a class="location-link" href="https://www.google.com/maps/search/?api=1&query=Cq.+3+%2369-38,+Laureles+-+Estadio,+Medellin,+Antioquia" target="_blank" rel="noopener">Cómo llegar en Google Maps →</a>
+          </div>
+          <div class="nav-actions">
+            <button type="button" class="nav-btn location-back-btn">← Volver</button>
+          </div>
         </div>
       </div>
 
@@ -636,6 +681,29 @@ document.getElementById('confirmation-exit-btn').addEventListener('click', exitI
 
 const rsvpFormView = document.getElementById('form-view');
 const rsvpArea = document.getElementById('rsvp-area');
+
+// ====== Toggle de ubicaciones (Ceremonia / Recepción) ======
+const locationLinks = document.getElementById('location-links');
+const ceremonyView = document.getElementById('ceremony-view');
+const receptionView = document.getElementById('reception-view');
+
+function showLocationDetail(view){
+  locationLinks.classList.add('collapsed');
+  ceremonyView.classList.add('collapsed');
+  receptionView.classList.add('collapsed');
+  view.classList.remove('collapsed');
+  view.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function hideLocationDetails(){
+  ceremonyView.classList.add('collapsed');
+  receptionView.classList.add('collapsed');
+  locationLinks.classList.remove('collapsed');
+  document.getElementById('como-llegar').scrollIntoView({behavior:'smooth', block:'center'});
+}
+document.getElementById('open-ceremony-btn').addEventListener('click', () => showLocationDetail(ceremonyView));
+document.getElementById('open-reception-btn').addEventListener('click', () => showLocationDetail(receptionView));
+document.querySelectorAll('.location-back-btn').forEach(btn => btn.addEventListener('click', hideLocationDetails));
+
 document.getElementById('open-rsvp-btn').addEventListener('click', () => {
   rsvpFormView.classList.remove('collapsed');
   document.getElementById('open-rsvp-btn').scrollIntoView({behavior:'smooth', block:'center'});
