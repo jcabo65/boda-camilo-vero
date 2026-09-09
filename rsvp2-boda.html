@@ -161,7 +161,7 @@
   }
   .location-map{
     width:100%;
-    height:150px;
+    height:100px;
     border:0;
     border-radius:4px;
     display:block;
@@ -472,42 +472,39 @@
         <div class="location-card">
           <div class="location-name">23 de enero, 2027 · 4:00 de la tarde</div>
           <div class="location-name">Iglesia Santo Cristo</div>
-          <div class="location-name">Bello, Antioquia</div>
+          <div class="location-address">Cra. 54 #52c30, La Mesa, Bello, Antioquia</div>
           <iframe
             class="location-map"
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
             title="Mapa Iglesia Santo Cristo, Bello"
-            src="https://www.google.com/maps?q=Iglesia+Santo+Cristo+Bello+Antioquia&output=embed">
+            src="https://www.google.com/maps?q=Cra.+54+%2352c30,+La+Mesa,+Bello,+Antioquia&output=embed">
           </iframe>
-          <a class="location-link" href="https://www.google.com/maps/search/?api=1&query=Iglesia+Santo+Cristo+Bello+Antioquia" target="_blank" rel="noopener">Cómo llegar en Google Maps →</a>
+          <a class="location-link" href="https://www.google.com/maps/search/?api=1&query=Cra.+54+%2352c30,+La+Mesa,+Bello,+Antioquia" target="_blank" rel="noopener">Cómo llegar en Google Maps →</a>
         </div>
 
         <div class="location-card">
           <div class="location-label">Recepción</div>
-          <!--
-            TODO: cuando tengas el nombre y la dirección exacta del salón,
-            reemplaza el bloque "location-pending" de abajo por algo como:
-
-            <div class="location-name">Nombre del salón</div>
-            <div class="location-address">Dirección del salón</div>
-            <iframe
-              class="location-map"
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-              title="Mapa del salón"
-              src="https://www.google.com/maps?q=Nombre+del+salon+direccion&output=embed">
-            </iframe>
-            <a class="location-link" href="https://www.google.com/maps/search/?api=1&query=Nombre+del+salon+direccion" target="_blank" rel="noopener">Cómo llegar en Google Maps →</a>
-          -->
-          <div class="location-pending">
-            Muy pronto compartimos el mapa del salón de la recepción 💛
-          </div>
+          <div class="location-name">Cuarzo Salón de Eventos</div>
+          <div class="location-address">Cq. 3 #69-38, Laureles - Estadio, Medellín, Antioquia</div>
+          <iframe
+            class="location-map"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Mapa Cuarzo Salón de Eventos"
+            src="https://www.google.com/maps?q=Cq.+3+%2369-38,+Laureles+-+Estadio,+Medellin,+Antioquia&output=embed">
+          </iframe>
+          <a class="location-link" href="https://www.google.com/maps/search/?api=1&query=Cq.+3+%2369-38,+Laureles+-+Estadio,+Medellin,+Antioquia" target="_blank" rel="noopener">Cómo llegar en Google Maps →</a>
         </div>
       </div>
 
       <div class="rsvp-invite" id="rsvp-area">
         <button type="button" class="rsvp-open-btn" id="open-rsvp-btn">Confirmar</button>
+      </div>
+
+      <div class="nav-actions">
+        <button type="button" class="nav-btn" id="back-btn">← Volver</button>
+        <button type="button" class="nav-btn" id="exit-btn">Salir</button>
       </div>
 
       <div id="form-view" class="rsvp-section collapsed">
@@ -540,10 +537,6 @@
           </div>
 
           <button type="submit" class="submit-btn">Confirmar invitación</button>
-          <div class="nav-actions">
-            <button type="button" class="nav-btn" id="back-btn">← Volver</button>
-            <button type="button" class="nav-btn" id="exit-btn">Salir</button>
-          </div>
         </form>
       </div>
 
