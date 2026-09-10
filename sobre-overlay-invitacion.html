@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invitación de boda</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600&family=EB+Garamond:wght@400;600&display=swap');
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'EB Garamond', serif;
+    background: #2b2b26;
+  }
+
+  /* ---------- CONTENIDO REAL (detrás, ocupa toda la pantalla) ---------- */
+  #realContent {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    z-index: 1;
+  }
+
+  /* ---------- OVERLAY DEL SOBRE (encima, se abre y desaparece) ---------- */
+  #overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    background: #2b2b26;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.6s ease 0.55s, visibility 0.6s ease 0.55s;
+  }
+  #overlay.opened {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .stage {
+    position: relative;
+    width: 300px;
+    height: 330px;
+    perspective: 1400px;
+  }
+
+  .envelope {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 290px;
+  }
+  .env-body {
+    position: absolute;
+    inset: 0;
+    background: #f3ead9;
+    border: 1px solid #c9a24b;
+    z-index: 2;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  }
+  .env-addressee {
+    position: absolute;
+    left: 0; right: 0;
+    top: 195px;
+    text-align: center;
+    padding: 0 20px;
+    transition: opacity 0.3s ease;
+  }
+  #overlay.opened .env-addressee { opacity: 0; }
+  .env-addressee .label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: #a8925a;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .env-addressee .name {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 23px;
+    color: #4a4432;
+  }
+  .env-flap {
+    position: absolute;
+    left: -1px; right: -1px;
+    top: -1px;
+    height: 160px;
+    background: #ecdfc4;
+    border: 1px solid #c9a24b;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    transition: transform 0.9s cubic-bezier(.6,.1,.3,1);
+    z-index: 4;
+  }
+  #overlay.opened .env-flap {
+    transform: rotateX(-170deg);
+    z-index: 0;
+  }
+  .seal {
+    position: absolute;
+    top: 128px; left: 50%;
+    transform: translateX(-50%);
+    width: 54px; height: 54px;
+    background: #5c6b3e;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f3ead9;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+    z-index: 5;
+    transition: opacity 0.3s ease;
+  }
+  #overlay.opened .seal { opacity: 0; }
+
+  .hint {
+    position: absolute;
+    bottom: -34px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 12.5px;
+    color: #b9ad8f;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<div id="overlay">
+  <div class="stage">
+    <div class="envelope">
+      <div class="env-body">
+        <div class="env-addressee">
+          <div class="label">Tenemos una invitación especial</div>
+          <div class="name" id="envAddresseeName">para ti</div>
+        </div>
+      </div>
+      <div class="env-flap"></div>
+      <div class="seal">C&amp;V</div>
+    </div>
+    <div class="hint">Abre el sobre para descubrirlo</div>
+  </div>
+</div>
+
+<script>
+  const guestNames = {
+    1:  "Amparo y Humberto",
+    2:  "Andrés y Caro",
+    3:  "Cristina, Sebas y Cristina",
+    4:  "Madre y Padre",
+    5:  "JuanPa y Sara",
+    6:  "Ángela, Sara y Dani",
+    7:  "Cecilia y Yeimi",
+    8:  "Jhon, Liz, Lucas y María",
+    9:  "Pilar y Jaime",
+    10: "Olga y Miguel",
+    11: "Deisy, Juanes y Ferney",
+    12: "Alda, Lubin y Cristina",
+    13: "Nore",
+    14: "Juan y Julia",
+    15: "Jorge, Erica y Paulina",
+    16: "Homero",
+    17: "Leo y Mery",
+    18: "Alex",
+    19: "Freddy con Esposa"
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  const guestId = params.get('id') || '1';
+  const guestName = guestNames[guestId] || ("Invitado " + guestId);
+
+  // La invitación real se abre navegando de verdad a esta URL (no en un iframe)
+  const realUrl = "https://jcabo65.github.io/boda-camilo-vero/invitacion.html?id=" + guestId;
+
+  document.getElementById('overlay').addEventListener('click', function () {
+    this.classList.add('opened');
+    // Espera a que termine la animación del sobre y luego navega de verdad
+    setTimeout(function () {
+      window.location.href = realUrl;
+    }, 1300);
+  });
+</script>
+
+</body>
+</html>
