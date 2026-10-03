@@ -133,21 +133,25 @@
   }
   .location-open-btn{
     flex:1;
-    padding:12px;
-    border:1px solid var(--line);
-    background:transparent;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:14px 10px;
+    border:1px solid #6d7355;
+    background:#7a8060;
     font-family:'EB Garamond', Georgia, serif;
-    font-size:14px;
-    letter-spacing:0.5px;
-    color:var(--gold-deep);
+    font-size:16px;
+    letter-spacing:1px;
+    color:#fff;
     cursor:pointer;
-    transition:all .2s ease;
-    border-radius:2px;
+    transition:background .2s ease, transform .1s ease;
+    border-radius:4px;
+    box-shadow:0 3px 8px rgba(51,66,47,.22);
   }
-  .location-open-btn:hover{
-    border-color:var(--green);
-    background:var(--cream-deep);
-  }
+  .location-open-btn svg{width:16px;height:16px;flex:none;}
+  .location-open-btn:hover{background:#6d7355;}
+  .location-open-btn:active{transform:translateY(1px);box-shadow:0 1px 3px rgba(51,66,47,.22);}
   .location-detail{
     margin-top:20px;
     padding-top:20px;
@@ -306,7 +310,6 @@
     transition:background .2s ease;
   }
   .rsvp-open-btn:hover{background:#6d7355;}
-  .rsvp-open-btn:hover{background:var(--cream-deep);}
   .rsvp-section{
     margin-top:18px;
     padding:20px 0 0;
@@ -519,8 +522,8 @@
         <p class="eyebrow" style="margin-bottom:16px;">CÓMO LLEGAR</p>
 
         <div class="location-links" id="location-links">
-          <button type="button" class="location-open-btn" id="open-ceremony-btn">Ceremonia</button>
-          <button type="button" class="location-open-btn" id="open-reception-btn">Recepción</button>
+          <button type="button" class="location-open-btn" id="open-ceremony-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>Ceremonia</button>
+          <button type="button" class="location-open-btn" id="open-reception-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>Recepción</button>
         </div>
 
         <div id="ceremony-view" class="location-detail collapsed">
@@ -609,7 +612,7 @@
       <div id="confirmation-view" class="confirmation hidden">
         <p>Gracias</p>
         <p id="confirmation-text"></p>
-        <p><a href="#como-llegar" style="color:var(--gold-deep);">Ver cómo llegar</a></p>
+        <p><button type="button" class="location-open-btn" id="goto-location-btn" style="width:100%;flex:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>Ver cómo llegar</button></p>
         <div class="nav-actions"><button type="button" class="nav-btn" id="confirmation-exit-btn">Salir</button></div>
       </div>
     </div>
@@ -738,6 +741,8 @@ function hideLocationDetails(){
 document.getElementById('open-ceremony-btn').addEventListener('click', () => showLocationDetail(ceremonyView));
 document.getElementById('open-reception-btn').addEventListener('click', () => showLocationDetail(receptionView));
 document.querySelectorAll('.location-back-btn').forEach(btn => btn.addEventListener('click', hideLocationDetails));
+// Desde la pantalla de confirmación: vuelve a los botones Ceremonia / Recepción
+document.getElementById('goto-location-btn').addEventListener('click', hideLocationDetails);
 
 document.getElementById('open-rsvp-btn').addEventListener('click', () => {
   rsvpFormView.classList.remove('collapsed');
