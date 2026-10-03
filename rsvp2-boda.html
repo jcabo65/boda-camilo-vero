@@ -480,15 +480,21 @@
 
       <div class="divider" style="margin:26px auto 18px;"></div>
 
-      <div style="display:flex; justify-content:center; gap:28px; margin:20px 0 4px; font-size:12px; color:var(--ink-soft); text-align:center;">
+      <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:20px 28px; margin:20px 0 4px; text-align:center;">
         <div>
-          <div style="letter-spacing:1px; color:var(--ink); font-size:11px; margin-bottom:4px;">CÓDIGO DE VESTIR</div>
-          Elegante ó casual
+          <div style="letter-spacing:2px; color:var(--gold-deep); font-size:12px; margin-bottom:6px;">CÓDIGO DE VESTIR</div>
+          <span style="font-family:'Cormorant Garamond', serif; font-size:21px; color:var(--ink);">Elegante ó casual</span>
         </div>
         <div>
-          <div style="letter-spacing:1px; color:var(--ink); font-size:11px; margin-bottom:4px;">REGALOS</div>
-          Lluvia de sobres
+          <div style="letter-spacing:2px; color:var(--gold-deep); font-size:12px; margin-bottom:6px;">REGALOS</div>
+          <span style="font-family:'Cormorant Garamond', serif; font-size:21px; color:var(--ink);">Lluvia de sobres</span>
         </div>
+      </div>
+
+      <!-- Descuento en alquiler de atuendo -->
+      <div style="margin:20px 0 4px; padding:14px 12px; text-align:center; background:rgba(138,154,107,0.14); border:1px dashed var(--gold); border-radius:4px;">
+        <div style="letter-spacing:2px; color:var(--gold-deep); font-size:12px; margin-bottom:4px;">DESCUENTO ESPECIAL</div>
+        <div style="font-size:16px; line-height:1.5; color:var(--ink);">En <strong style="font-family:'Cormorant Garamond', serif; font-size:21px;">Luifer Bello</strong> pueden obtener <strong>50% de descuento en alquiler</strong></div>
       </div>
 
       <div class="divider"></div>
@@ -636,10 +642,6 @@ if (idParam) {
       if (data.nombre) {
         mostrarInvitado(data.nombre);
         if (data.confirmado) {
-          // La hoja ya tiene el campo Confirmado lleno: bloqueamos también en este dispositivo
-          if (RSVP_LOCK_KEY !== 'rsvp-confirmed:') {
-            try { localStorage.setItem(RSVP_LOCK_KEY, '1'); } catch (e) {}
-          }
           mostrarYaConfirmado();
         }
       }
@@ -806,7 +808,6 @@ document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
         body: JSON.stringify({
           Nombre: name,
           Id: idParam || '',
-          Confirmado: 'Sí', // el script lo escribe en la columna "Confirmado" de la hoja
           Asistencia: attending ? 'Sí asistiré' : 'No podré ir',
           Acompañantes: guests,
           Mensaje: message || '(sin mensaje)'
@@ -822,11 +823,7 @@ document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
     }
   }
 
-  // Envío correcto: bloqueamos nuevos envíos en este dispositivo
-  alreadyConfirmed = true;
-  if (RSVP_LOCK_KEY !== 'rsvp-confirmed:') {
-    try { localStorage.setItem(RSVP_LOCK_KEY, '1'); } catch (e) {}
-  }
+  enviando = false;
 
   document.getElementById('form-view').classList.add('hidden');
   document.getElementById('rsvp-area').classList.add('hidden');
