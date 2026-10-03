@@ -588,7 +588,7 @@
       <div id="confirmation-view" class="confirmation hidden">
         <p>Gracias</p>
         <p id="confirmation-text"></p>
-        <p><a href="#como-llegar" style="color:var(--gold-deep);
+        <p><a href="#como-llegar" style="color:var(--gold-deep);">Ver cómo llegar</a></p>
         <div class="nav-actions"><button type="button" class="nav-btn" id="confirmation-exit-btn">Salir</button></div>
       </div>
     </div>
@@ -614,6 +614,14 @@ const urlParams = new URLSearchParams(window.location.search);
 const idParam = urlParams.get('id');
 const invitadoParam = urlParams.get('invitado');
 
+// Oculta el formulario y el botón "Confirmar" y muestra el mensaje de ya confirmado
+function mostrarYaConfirmado() {
+  document.getElementById('form-view').classList.add('hidden');
+  document.getElementById('rsvp-area').classList.add('hidden');
+  document.getElementById('confirmation-view').classList.remove('hidden');
+  document.getElementById('confirmation-text').textContent = 'Esta invitación ya fue confirmada anteriormente. Gracias por avisarnos.';
+}
+
 function mostrarInvitado(nombre) {
   document.getElementById('guest-name').textContent = nombre;
   document.getElementById('guest-box').classList.remove('hidden');
@@ -628,9 +636,11 @@ if (idParam) {
       if (data.nombre) {
         mostrarInvitado(data.nombre);
         if (data.confirmado) {
-          document.getElementById('form-view').classList.add('hidden');
-          document.getElementById('confirmation-view').classList.remove('hidden');
-          document.getElementById('confirmation-text').textContent = 'Esta invitación ya fue confirmada anteriormente. Gracias por avisarnos.';
+          // La hoja ya tiene el campo Confirmado lleno: bloqueamos también en este dispositivo
+          if (RSVP_LOCK_KEY !== 'rsvp-confirmed:') {
+            try { localStorage.setItem(RSVP_LOCK_KEY, '1'); } catch (e) {}
+          }
+          mostrarYaConfirmado();
         }
       }
     })
@@ -672,7 +682,10 @@ document.getElementById('guests').addEventListener('input', () => {
 });
 
 const RSVP_LOCK_KEY = 'rsvp-confirmed:' + (idParam || invitadoParam || '');
-const alreadyConfirmed = RSVP_LOCK_KEY !== 'rsvp-confirmed:' && localStorage.getItem(RSVP_LOCK_KEY) === '1';
+let alreadyConfirmed = false;
+try {
+  alreadyConfirmed = RSVP_LOCK_KEY !== 'rsvp-confirmed:' && localStorage.getItem(RSVP_LOCK_KEY) === '1';
+} catch (e) {}
 
 function exitInvitation(){
   if(document.referrer && document.referrer !== window.location.href) window.history.back();
@@ -720,11 +733,10 @@ document.getElementById('back-btn').addEventListener('click', () => {
 });
 
 if(alreadyConfirmed){
-  if(RSVP_LOCK_KEY !== 'rsvp-confirmed:') localStorage.setItem(RSVP_LOCK_KEY,'1');
-  document.getElementById('form-view').classList.add('hidden');
-  document.getElementById('confirmation-view').classList.remove('hidden');
-  document.getElementById('confirmation-text').textContent='Esta invitación ya fue confirmada anteriormente. Gracias por avisarnos.';
+  mostrarYaConfirmado();
 }
+
+let enviando = false;
 
 document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -758,6 +770,7 @@ document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
   }
 
   if (!valid) return;
+  if (enviando || alreadyConfirmed) return; // evita doble envío
 
   const guests = attending ? Number(guestsInput.value || 0) : 0;
   const message = document.getElementById('message').value.trim();
@@ -771,6 +784,7 @@ document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
   };
 
   const submitBtn = document.querySelector('.submit-btn');
+  enviando = true;
   submitBtn.disabled = true;
   submitBtn.textContent = 'Enviando...';
 
@@ -792,17 +806,30 @@ document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
         body: JSON.stringify({
           Nombre: name,
           Id: idParam || '',
+          Confirmado: 'Sí', // el script lo escribe en la columna "Confirmado" de la hoja
           Asistencia: attending ? 'Sí asistiré' : 'No podré ir',
           Acompañantes: guests,
           Mensaje: message || '(sin mensaje)'
         })
       });
     } catch (scriptErr) {
-      // Continuar
+      // Sin conexión: no marcamos como confirmado para que pueda reintentar
+      enviando = false;
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Confirmar invitación';
+      alert('No pudimos enviar tu confirmación. Revisa tu conexión e inténtalo de nuevo.');
+      return;
     }
   }
 
+  // Envío correcto: bloqueamos nuevos envíos en este dispositivo
+  alreadyConfirmed = true;
+  if (RSVP_LOCK_KEY !== 'rsvp-confirmed:') {
+    try { localStorage.setItem(RSVP_LOCK_KEY, '1'); } catch (e) {}
+  }
+
   document.getElementById('form-view').classList.add('hidden');
+  document.getElementById('rsvp-area').classList.add('hidden');
   document.getElementById('confirmation-view').classList.remove('hidden');
   const confText = document.getElementById('confirmation-text');
   confText.textContent = attending
