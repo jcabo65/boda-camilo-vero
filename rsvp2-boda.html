@@ -629,6 +629,11 @@ if (idParam) {
         mostrarInvitado(data.nombre);
       }
     })
+    if (data.confirmado) {
+          document.getElementById('form-view').classList.add('hidden');
+          document.getElementById('confirmation-view').classList.remove('hidden');
+          document.getElementById('confirmation-text').textContent = 'Esta invitación ya fue confirmada anteriormente. Gracias por avisarnos.';
+    }
     .catch(() => {
       // Si falla la búsqueda, el invitado igual puede escribir su nombre a mano.
     });
@@ -786,6 +791,7 @@ document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({
           Nombre: name,
+          Id: idParam || '',
           Asistencia: attending ? 'Sí asistiré' : 'No podré ir',
           Acompañantes: guests,
           Mensaje: message || '(sin mensaje)'
