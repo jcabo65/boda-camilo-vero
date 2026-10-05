@@ -436,6 +436,18 @@
     font-size:13px;
     padding:20px 0;
   }
+
+  /* ====== Mejoras: calendario, WhatsApp y verificación ====== */
+  input[type="text"], input[type="number"], textarea{font-size:16px;} /* evita el zoom automático en iPhone */
+  .calendar-section{margin:8px 0 4px;text-align:center;}
+  .calendar-links{display:flex;gap:12px;flex-wrap:wrap;}
+  .calendar-links .location-open-btn{text-decoration:none;min-width:130px;}
+  .wa-alt{text-align:center;margin:12px 0 0;font-size:13px;}
+  .wa-alt a{color:var(--gold-deep);text-decoration:none;border-bottom:1px solid var(--gold-deep);}
+  .verify-note{margin-top:14px;padding:12px;border:1px dashed var(--gold);border-radius:4px;font-size:13px;line-height:1.7;color:var(--ink-soft);text-align:center;}
+  .verify-note a{color:var(--gold-deep);}
+  .change-answer{margin-top:6px;}
+  .change-answer button{background:none;border:none;color:var(--gold-deep);font-family:'EB Garamond',Georgia,serif;font-size:13px;text-decoration:underline;cursor:pointer;padding:10px;}
 </style>
 </head>
 <body>
@@ -567,8 +579,19 @@
         </div>
       </div>
 
+      <!-- ====== GUARDA LA FECHA (calendario) ====== -->
+      <div class="divider" style="margin:24px auto;"></div>
+      <div class="calendar-section" id="agregar-calendario">
+        <p class="eyebrow" style="margin-bottom:16px;">GUARDA LA FECHA</p>
+        <div class="calendar-links">
+          <a class="location-open-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Boda%20de%20Camilo%20%26%20Ver%C3%B3nica&amp;dates=20270124T160000Z%2F20270124T220000Z&amp;details=Ceremonia%3A%2011%3A00%20a.%20m.%20en%20la%20Parroquia%20Ascensi%C3%B3n%20del%20Se%C3%B1or.%20Recepci%C3%B3n%3A%20Cuarzo%20Sal%C3%B3n%20de%20Eventos%2C%20Cq.%203%20%2369-38%2C%20Laureles%20-%20Estadio%2C%20Medell%C3%ADn%2C%20despu%C3%A9s%20de%20la%20ceremonia.%20C%C3%B3digo%20de%20vestir%3A%20elegante%20o%20casual.&amp;location=Parroquia%20Ascensi%C3%B3n%20del%20Se%C3%B1or%2C%20Av.%2038%20%2355-118%2C%20Niqu%C3%ADa%2C%20Bello%2C%20Antioquia" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 3v3M16 3v3"/></svg>Google Calendar</a>
+          <a class="location-open-btn" href="boda-camilo-vero.ics" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 3v3M16 3v3"/></svg>Apple / Outlook</a>
+        </div>
+      </div>
+
       <div class="rsvp-invite" id="rsvp-area">
         <button type="button" class="rsvp-open-btn" id="open-rsvp-btn">Confirmar</button>
+        <p class="wa-alt hidden" id="wa-alt"><a id="wa-alt-link" href="#" target="_blank" rel="noopener">¿Prefieres confirmar por WhatsApp?</a></p>
       </div>
 
       <div class="nav-actions">
@@ -612,6 +635,8 @@
       <div id="confirmation-view" class="confirmation hidden">
         <p>Gracias</p>
         <p id="confirmation-text"></p>
+        <div class="verify-note hidden" id="verify-note"></div>
+        <p class="change-answer"><button type="button" id="change-answer-btn">Cambiar mi respuesta</button></p>
         <p><button type="button" class="location-open-btn" id="goto-location-btn" style="width:100%;flex:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>Ver cómo llegar</button></p>
         <div class="nav-actions"><button type="button" class="nav-btn" id="confirmation-exit-btn">Salir</button></div>
       </div>
@@ -632,6 +657,12 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwu98bB7a9fEZ
 
 // Script que busca el nombre del invitado en Google Sheets (el mismo que usa invitacion.html)
 const LOOKUP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcTj_MoRKAioXtbtcT2zjrTvxzjEIIx20Vu9cNL7pK5uxlK_D1hizb8oTtY1QUOODy/exec';
+
+// ====== MEJORAS ======
+// Número de WhatsApp de los novios con código de país, sin "+" ni espacios (ej: 573001234567).
+// Si se deja vacío, los botones de WhatsApp simplemente no aparecen.
+const WHATSAPP_NUMBER = '';
+let esCambioDeRespuesta = false;
 
 // ====== LEER INVITADO DESDE LA URL ======
 const urlParams = new URLSearchParams(window.location.search);
@@ -758,6 +789,76 @@ if(alreadyConfirmed){
   mostrarYaConfirmado();
 }
 
+// ====== WhatsApp (opcional) ======
+function waLink(texto){
+  return 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(texto);
+}
+function textoWhatsApp(){
+  const nombre = (document.getElementById('name').value || '').trim();
+  return 'Hola Camilo y Verónica, soy ' + (nombre || 'un invitado') +
+         '. Les escribo por mi invitación a la boda del 24 de enero.';
+}
+(function initWhatsApp(){
+  if(!WHATSAPP_NUMBER) return;
+  const wrap = document.getElementById('wa-alt');
+  const link = document.getElementById('wa-alt-link');
+  wrap.classList.remove('hidden');
+  link.href = waLink(textoWhatsApp());
+  link.addEventListener('click', function(){ this.href = waLink(textoWhatsApp()); });
+})();
+
+// ====== Aviso bajo la confirmación (verificación / cambio de respuesta) ======
+function mostrarNota(texto){
+  const note = document.getElementById('verify-note');
+  note.textContent = texto;
+  if(WHATSAPP_NUMBER){
+    const a = document.createElement('a');
+    a.href = waLink(textoWhatsApp() + ' Quería confirmar que mi respuesta quedó registrada.');
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = 'Escribir por WhatsApp';
+    note.appendChild(document.createElement('br'));
+    note.appendChild(a);
+  }
+  note.classList.remove('hidden');
+}
+
+// Después de enviar, vuelve a preguntarle a la hoja si ya quedó marcada como confirmada.
+// No cambia nada de lo que ve el invitado salvo que no se pueda comprobar el registro.
+async function verificarRegistro(){
+  if(!idParam) return;
+  for(let i = 0; i < 4; i++){
+    await new Promise(r => setTimeout(r, i === 0 ? 1500 : 2500));
+    try{
+      const resp = await fetch(LOOKUP_SCRIPT_URL + '?id=' + encodeURIComponent(idParam) + '&t=' + Date.now());
+      const data = await resp.json();
+      if(data && data.confirmado) return; // registro verificado
+    }catch(e){ /* reintenta */ }
+  }
+  mostrarNota(WHATSAPP_NUMBER
+    ? 'Enviamos tu respuesta, pero no pudimos comprobar que quedara registrada. Para estar tranquilos, avísanos también por WhatsApp.'
+    : 'Enviamos tu respuesta, pero no pudimos comprobar que quedara registrada. Para estar tranquilos, vuelve a abrir tu invitación en unos minutos: si ya aparece como confirmada, todo quedó bien.');
+}
+
+// ====== Cambiar mi respuesta ======
+document.getElementById('change-answer-btn').addEventListener('click', () => {
+  esCambioDeRespuesta = true;
+  alreadyConfirmed = false;
+  attending = null;
+  btnYes.classList.remove('active');
+  btnNo.classList.remove('active');
+  guestsField.classList.remove('show');
+  document.getElementById('guests').value = '';
+  document.getElementById('verify-note').classList.add('hidden');
+  document.getElementById('confirmation-view').classList.add('hidden');
+  rsvpFormView.classList.remove('hidden');
+  rsvpFormView.classList.remove('collapsed');
+  const sb = document.querySelector('.submit-btn');
+  sb.disabled = false;
+  sb.textContent = 'Enviar cambio';
+  rsvpFormView.scrollIntoView({behavior:'smooth', block:'center'});
+});
+
 let enviando = false;
 
 document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
@@ -830,7 +931,7 @@ document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
           Id: idParam || '',
           Asistencia: attending ? 'Sí asistiré' : 'No podré ir',
           Acompañantes: guests,
-          Mensaje: message || '(sin mensaje)'
+          Mensaje: (esCambioDeRespuesta ? '[CAMBIO DE RESPUESTA] ' : '') + (message || '(sin mensaje)')
         })
       });
     } catch (scriptErr) {
@@ -852,6 +953,13 @@ document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
   confText.textContent = attending
     ? 'Tu asistencia quedó confirmada. Nos vemos el 24 de enero.'
     : 'Gracias por avisarnos. Te vamos a extrañar ese día.';
+
+  if (esCambioDeRespuesta) {
+    confText.textContent = 'Recibimos tu cambio de respuesta. ' + confText.textContent;
+    mostrarNota('Si tu respuesta anterior ya estaba registrada, avísanos también para asegurarnos de que quede actualizada.');
+  } else {
+    verificarRegistro();
+  }
 });
 
 async function loadAdminView() {
@@ -860,6 +968,11 @@ async function loadAdminView() {
 
   const listEl = document.getElementById('admin-list');
   const summaryEl = document.getElementById('admin-summary');
+
+  if (!window.storage) {
+    listEl.innerHTML = '<div class="admin-empty">Las confirmaciones se guardan en tu hoja de Google Sheets; este panel no está disponible fuera de Claude.</div>';
+    return;
+  }
 
   try {
     const listResult = await window.storage.list('rsvp:', true);
