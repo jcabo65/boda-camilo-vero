@@ -441,10 +441,17 @@ const GOOGLE_SCRIPT_URL =
 'https://script.google.com/macros/s/AKfycbwcTj_MoRKAioXtbtcT2zjrTvxzjEIIx20Vu9cNL7pK5uxlK_D1hizb8oTtY1QUOODy/exec';
 
 const urlParams = new URLSearchParams(window.location.search);
-let id = urlParams.get('id');
-if (!id) { id = '1'; }
+// true = comportamiento anterior: si el enlace no trae ?id= se muestra la invitación 1.
+// false = si falta el ?id= no se muestra el nombre de nadie ni el botón de confirmar.
+const PERMITIR_SIN_ID = false;
 
-fetch(GOOGLE_SCRIPT_URL + '?id=' + encodeURIComponent(id))
+let id = urlParams.get('id');
+if (!id && PERMITIR_SIN_ID) { id = '1'; }
+
+if (!id) {
+    document.getElementById('guest-name').textContent = '¡Tú y tu familia!';
+    document.getElementById('invitation-button').style.display = 'none';
+} else fetch(GOOGLE_SCRIPT_URL + '?id=' + encodeURIComponent(id))
     .then(response => {
         if (!response.ok) {
             throw new Error('Error al conectar con Google Apps Script');
