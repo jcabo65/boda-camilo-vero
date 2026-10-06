@@ -652,6 +652,7 @@ const LOOKUP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcTj_MoRKAio
 const WHATSAPP_NUMBER = '';
 let esCambioDeRespuesta = false;
 let valorConfirmadoHoja = ''; // último valor de la columna "confirmado" que devolvió la hoja
+let esReenvio = false; // true cuando el invitado pulsa "Confirmar nuevamente"
 // ====== LEER INVITADO DESDE LA URL ======
 const urlParams = new URLSearchParams(window.location.search);
 const idParam = urlParams.get('id');
@@ -831,6 +832,7 @@ async function verificarCambio(){
 // ====== Confirmar nuevamente ======
 document.getElementById('change-answer-btn').addEventListener('click', () => {
   esCambioDeRespuesta = false;
+  esReenvio = true;
   attending = null;
   btnYes.classList.remove('active');
   btnNo.classList.remove('active');
@@ -907,6 +909,10 @@ document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
     }
   }
 
+  // Si la hoja ya tiene una respuesta de este invitado (o pulsó "Confirmar nuevamente"),
+  // el envío se marca como reconfirmación; si no, el script lo ignoraría sin avisar.
+  const reenvio = esReenvio || !!valorConfirmadoHoja;
+
   if (GOOGLE_SCRIPT_URL !== 'TU_SCRIPT_URL') {
     try {
       await fetch(GOOGLE_SCRIPT_URL, {
@@ -918,7 +924,8 @@ document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
           Id: idParam || '',
           Asistencia: attending ? 'Sí asistiré' : 'No podré ir',
           Acompañantes: guests,
-          Mensaje: message || '(sin mensaje)'
+          Mensaje: message || '(sin mensaje)',
+          ...(reenvio ? { Cambio: 'Sí' } : {})
         })
       });
     } catch (scriptErr) {
@@ -941,7 +948,11 @@ document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
     ? 'Tu asistencia quedó confirmada. Nos vemos el 24 de enero.'
     : 'Gracias por avisarnos. Te vamos a extrañar ese día.';
 
-  verificarRegistro();
+  if (reenvio) {
+    verificarCambio(); // comprueba que la hoja realmente guardó la nueva respuesta
+  } else {
+    verificarRegistro();
+  }
 });
 
 async function loadAdminView() {
